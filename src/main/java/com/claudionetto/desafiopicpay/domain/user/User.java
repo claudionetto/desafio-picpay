@@ -1,5 +1,6 @@
 package com.claudionetto.desafiopicpay.domain.user;
 
+import com.claudionetto.desafiopicpay.dto.UserCreateDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,5 +32,17 @@ public class User {
     private UserType userType;
 
     private BigDecimal balance;
+
+    public User(UserCreateDTO userCreateDTO){
+
+        this.firstName = userCreateDTO.firstName();
+        this.lastName = userCreateDTO.lastName();
+        this.email = userCreateDTO.email();
+        this.document = userCreateDTO.document();
+        this.password = userCreateDTO.password();
+        this.userType = userCreateDTO.userType();
+        this.balance = userCreateDTO.balance();
+
+    }
 
 }
