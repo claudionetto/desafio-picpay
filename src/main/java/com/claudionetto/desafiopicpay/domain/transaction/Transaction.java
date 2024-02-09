@@ -3,6 +3,7 @@ package com.claudionetto.desafiopicpay.domain.transaction;
 import com.claudionetto.desafiopicpay.domain.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity(name = "transactions")
 public class Transaction {
 
