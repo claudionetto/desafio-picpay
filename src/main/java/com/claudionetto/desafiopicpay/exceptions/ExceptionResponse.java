@@ -18,5 +18,4 @@ public class ExceptionResponse {
     private int status;
     private LocalDateTime timeStamp;
     private String path;
-
 }

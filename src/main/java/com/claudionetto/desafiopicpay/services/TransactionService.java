@@ -2,8 +2,8 @@ package com.claudionetto.desafiopicpay.services;
 
 import com.claudionetto.desafiopicpay.domain.transaction.Transaction;
 import com.claudionetto.desafiopicpay.domain.user.User;
-import com.claudionetto.desafiopicpay.domain.user.UserType;
 import com.claudionetto.desafiopicpay.dto.TransactionDTO;
+import com.claudionetto.desafiopicpay.exceptions.UnauthorizedTransactionException;
 import com.claudionetto.desafiopicpay.repositories.TransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -35,7 +34,7 @@ public class TransactionService {
         boolean isAuthorize = this.authorizeTransaction();
 
         if (!isAuthorize) {
-            throw new Exception("Transação não autorizada");
+            throw new UnauthorizedTransactionException("Transação não autorizada");
         }
 
         this.notificationService.sendNotifation(payee.getEmail());

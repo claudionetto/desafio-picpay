@@ -1,7 +1,6 @@
 package com.claudionetto.desafiopicpay.handlers;
 
-import com.claudionetto.desafiopicpay.exceptions.ExceptionResponse;
-import com.claudionetto.desafiopicpay.exceptions.InsufficientBalanceException;
+import com.claudionetto.desafiopicpay.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,24 +16,59 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> handlerInsufficientBalanceException(
             InsufficientBalanceException ex, HttpServletRequest request){
 
-        String title = "Insufficient Balance for this transaction";
-        return response(title, ex.getMessage(), request, HttpStatus.BAD_REQUEST, LocalDateTime.now());
-    }
-
-    private ResponseEntity<ExceptionResponse> response(
-            final String title, final String details, final HttpServletRequest request,
-            final HttpStatus status, LocalDateTime date) {
-
-        return ResponseEntity
-                .status(status)
-                .body(ExceptionResponse.builder()
-                        .title(title)
-                        .details(details)
-                        .status(status.value())
-                        .timeStamp(date)
+        return new ResponseEntity<>(
+                ExceptionResponse.builder()
+                        .title("Insufficient balance, check the documentation ")
+                        .status(HttpStatus.BAD_REQUEST.value())
+                        .details(ex.getMessage())
+                        .timeStamp(LocalDateTime.now())
                         .path(request.getRequestURI())
-                        .build());
-
+                        .build(), HttpStatus.BAD_REQUEST
+        );
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handlerUserNotFoundException(
+            UserNotFoundException ex, HttpServletRequest request){
+
+        return new ResponseEntity<>(
+                ExceptionResponse.builder()
+                        .title("User not found, check the documentation ")
+                        .status(HttpStatus.NOT_FOUND.value())
+                        .details(ex.getMessage())
+                        .timeStamp(LocalDateTime.now())
+                        .path(request.getRequestURI())
+                        .build(), HttpStatus.NOT_FOUND
+        );
+    }
+
+    @ExceptionHandler(MerchantCannotMakeTransactionsException.class)
+    public ResponseEntity<ExceptionResponse> handlerMerchantCannotMakeTransactionsException(
+            MerchantCannotMakeTransactionsException ex, HttpServletRequest request){
+
+        return new ResponseEntity<>(
+                ExceptionResponse.builder()
+                        .title("Merchant cannot make transactions, check the documentation ")
+                        .status(HttpStatus.FORBIDDEN.value())
+                        .details(ex.getMessage())
+                        .timeStamp(LocalDateTime.now())
+                        .path(request.getRequestURI())
+                        .build(), HttpStatus.FORBIDDEN
+        );
+    }
+
+    @ExceptionHandler(UnauthorizedTransactionException.class)
+    public ResponseEntity<ExceptionResponse> handlerUnauthorizedTransactionException(
+            UnauthorizedTransactionException ex, HttpServletRequest request){
+
+        return new ResponseEntity<>(
+                ExceptionResponse.builder()
+                        .title("Unauthorized transaction, check the documentation ")
+                        .status(HttpStatus.FORBIDDEN.value())
+                        .details(ex.getMessage())
+                        .timeStamp(LocalDateTime.now())
+                        .path(request.getRequestURI())
+                        .build(), HttpStatus.FORBIDDEN
+        );
+    }
 }
