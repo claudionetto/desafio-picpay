@@ -1,9 +1,7 @@
 package com.claudionetto.desafiopicpay.converter;
 
 import com.claudionetto.desafiopicpay.domain.transaction.Transaction;
-import com.claudionetto.desafiopicpay.domain.user.User;
 import com.claudionetto.desafiopicpay.dto.TransactionResponseDTO;
-import com.claudionetto.desafiopicpay.dto.UserResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

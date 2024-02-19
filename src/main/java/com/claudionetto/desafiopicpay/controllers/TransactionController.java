@@ -1,11 +1,8 @@
 package com.claudionetto.desafiopicpay.controllers;
 
-import com.claudionetto.desafiopicpay.domain.transaction.Transaction;
-import com.claudionetto.desafiopicpay.domain.user.User;
 import com.claudionetto.desafiopicpay.dto.TransactionDTO;
 import com.claudionetto.desafiopicpay.dto.TransactionResponseDTO;
 import com.claudionetto.desafiopicpay.services.TransactionService;
-import com.claudionetto.desafiopicpay.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

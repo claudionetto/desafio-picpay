@@ -1,7 +1,6 @@
 package com.claudionetto.desafiopicpay.converter;
 
 import com.claudionetto.desafiopicpay.domain.user.User;
-import com.claudionetto.desafiopicpay.dto.UserCreateDTO;
 import com.claudionetto.desafiopicpay.dto.UserResponseDTO;
 import org.springframework.stereotype.Component;
 
