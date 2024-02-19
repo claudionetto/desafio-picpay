@@ -1,8 +1,10 @@
 package com.claudionetto.desafiopicpay.services;
 
+import com.claudionetto.desafiopicpay.converter.UserConverter;
 import com.claudionetto.desafiopicpay.domain.user.User;
 import com.claudionetto.desafiopicpay.domain.user.UserType;
 import com.claudionetto.desafiopicpay.dto.UserCreateDTO;
+import com.claudionetto.desafiopicpay.dto.UserResponseDTO;
 import com.claudionetto.desafiopicpay.exceptions.InsufficientBalanceException;
 import com.claudionetto.desafiopicpay.exceptions.MerchantCannotMakeTransactionsException;
 import com.claudionetto.desafiopicpay.exceptions.UserNotFoundException;
@@ -18,15 +20,17 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserConverter userConverter;
 
-    public List<User> listAll() {
-        return this.userRepository.findAll();
+    public List<UserResponseDTO> listAll() {
+        List<User> userList = this.userRepository.findAll();
+        return userConverter.toUserResponseDTOList(userList);
     }
 
-    public User save(UserCreateDTO userCreateDTO) {
-
+    public UserResponseDTO save(UserCreateDTO userCreateDTO) {
         var user = new User(userCreateDTO);
-        return this.userRepository.save(user);
+        User userCreated = this.userRepository.save(user);
+        return userConverter.toUserResponseDTO(userCreated);
     }
 
     public User updateBalance(User user) {
@@ -37,7 +41,7 @@ public class UserService {
         return this.userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
     }
 
-    public boolean validateUser(User user, BigDecimal amount){
+    public boolean validateUser(User user, BigDecimal amount) {
 
         if (user.getUserType() == UserType.MERCHANT) {
             throw new MerchantCannotMakeTransactionsException("Lojistas não podem realizar transações, somente receber");

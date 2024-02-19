@@ -3,6 +3,7 @@ package com.claudionetto.desafiopicpay.domain.user;
 import com.claudionetto.desafiopicpay.dto.UserCreateDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import java.math.BigDecimal;
 
 @Entity(name = "users")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {

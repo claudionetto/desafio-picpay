@@ -1,8 +1,10 @@
 package com.claudionetto.desafiopicpay.services;
 
+import com.claudionetto.desafiopicpay.converter.TransactionConverter;
 import com.claudionetto.desafiopicpay.domain.transaction.Transaction;
 import com.claudionetto.desafiopicpay.domain.user.User;
 import com.claudionetto.desafiopicpay.dto.TransactionDTO;
+import com.claudionetto.desafiopicpay.dto.TransactionResponseDTO;
 import com.claudionetto.desafiopicpay.exceptions.UnauthorizedTransactionException;
 import com.claudionetto.desafiopicpay.repositories.TransactionRepository;
 import jakarta.transaction.Transactional;
@@ -21,10 +23,11 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserService userService;
     private final NotificationService notificationService;
+    private final TransactionConverter transactionConverter;
     private final RestTemplate restTemplate;
 
     @Transactional
-    public Transaction createTransaction(TransactionDTO transactionDTO) throws Exception {
+    public TransactionResponseDTO createTransaction(TransactionDTO transactionDTO) throws Exception {
 
         User payer = this.userService.findById(transactionDTO.payer());
         User payee = this.userService.findById(transactionDTO.payee());
@@ -54,7 +57,7 @@ public class TransactionService {
         userService.updateBalance(payer);
         userService.updateBalance(payee);
 
-        return transactionSaved;
+        return transactionConverter.toTransactionResponseDTO(transactionSaved);
     }
 
     public boolean authorizeTransaction() {

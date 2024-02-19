@@ -2,6 +2,7 @@ package com.claudionetto.desafiopicpay.controllers;
 
 import com.claudionetto.desafiopicpay.domain.user.User;
 import com.claudionetto.desafiopicpay.dto.UserCreateDTO;
+import com.claudionetto.desafiopicpay.dto.UserResponseDTO;
 import com.claudionetto.desafiopicpay.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpMethod;
@@ -19,12 +20,12 @@ public class UserController {
 
     private final UserService userService;
     @GetMapping
-    public ResponseEntity<List<User>> listAll(){
+    public ResponseEntity<List<UserResponseDTO>> listAll(){
         return ResponseEntity.ok(this.userService.listAll());
     }
 
     @PostMapping
-    public ResponseEntity<User> save(@RequestBody UserCreateDTO userCreateDTO){
+    public ResponseEntity<UserResponseDTO> save(@RequestBody UserCreateDTO userCreateDTO){
         return  new ResponseEntity<>(userService.save(userCreateDTO), HttpStatus.CREATED);
     }
 
