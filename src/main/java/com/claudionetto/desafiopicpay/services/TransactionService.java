@@ -9,12 +9,9 @@ import com.claudionetto.desafiopicpay.exceptions.UnauthorizedTransactionExceptio
 import com.claudionetto.desafiopicpay.repositories.TransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +21,7 @@ public class TransactionService {
     private final UserService userService;
     private final NotificationService notificationService;
     private final TransactionConverter transactionConverter;
-    private final RestTemplate restTemplate;
+    private final AuthorizationService authorizationService;
 
     @Transactional
     public TransactionResponseDTO createTransaction(TransactionDTO transactionDTO) {
@@ -34,7 +31,7 @@ public class TransactionService {
 
         this.userService.validateUser(payer, transactionDTO.amount());
 
-        boolean isAuthorize = this.authorizeTransaction();
+        boolean isAuthorize = this.authorizationService.authorizeTransaction();
 
         if (!isAuthorize) {
             throw new UnauthorizedTransactionException("Transação não autorizada");
@@ -58,19 +55,5 @@ public class TransactionService {
         userService.updateBalance(payee);
 
         return transactionConverter.toTransactionResponseDTO(transactionSaved);
-    }
-
-    public boolean authorizeTransaction() {
-        String url = "https://run.mocky.io/v3/5794d450-d2e2-4412-8131-73d0293ac1cc";
-
-        var response = restTemplate.getForEntity(url, Map.class);
-
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-
-            Map<String, Object> responseBody = response.getBody();
-            return responseBody.get("message").equals("Autorizado");
-
-        }
-        return false;
     }
 }
