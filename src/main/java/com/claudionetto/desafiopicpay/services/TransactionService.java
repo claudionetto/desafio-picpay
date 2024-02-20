@@ -27,7 +27,7 @@ public class TransactionService {
     private final RestTemplate restTemplate;
 
     @Transactional
-    public TransactionResponseDTO createTransaction(TransactionDTO transactionDTO) throws Exception {
+    public TransactionResponseDTO createTransaction(TransactionDTO transactionDTO) {
 
         User payer = this.userService.findById(transactionDTO.payer());
         User payee = this.userService.findById(transactionDTO.payee());
