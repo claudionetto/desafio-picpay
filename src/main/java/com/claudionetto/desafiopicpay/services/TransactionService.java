@@ -26,8 +26,8 @@ public class TransactionService {
     @Transactional
     public TransactionResponseDTO createTransaction(TransactionDTO transactionDTO) {
 
-        User payer = this.userService.findById(transactionDTO.payer());
-        User payee = this.userService.findById(transactionDTO.payee());
+        User payer = this.userService.findById(transactionDTO.payerId());
+        User payee = this.userService.findById(transactionDTO.payeeId());
 
         this.userService.validateUser(payer, transactionDTO.amount());
 
