@@ -89,9 +89,9 @@ class TransactionServiceTest {
 
         TransactionDTO transactionDTO = new TransactionDTO(new BigDecimal(20), 1L, 2L);
 
-        UnauthorizedTransactionException exception = assertThrows(UnauthorizedTransactionException.class, () -> {
-            transactionService.createTransaction(transactionDTO);
-        });
+        UnauthorizedTransactionException exception = assertThrows(UnauthorizedTransactionException.class,
+                () -> transactionService.createTransaction(transactionDTO)
+        );
 
         Assertions.assertEquals("Transação não autorizada", exception.getMessage());
 
@@ -116,9 +116,7 @@ class TransactionServiceTest {
 
         TransactionDTO transactionDTO = new TransactionDTO(new BigDecimal(20), 1L, 2L);
 
-        assertThrows(RuntimeException.class, () -> {
-            transactionService.createTransaction(transactionDTO);
-        });
+        assertThrows(RuntimeException.class, () -> transactionService.createTransaction(transactionDTO));
 
         verifyNoInteractions(notificationService);
     }
