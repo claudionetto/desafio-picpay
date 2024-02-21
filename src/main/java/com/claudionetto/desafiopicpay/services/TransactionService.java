@@ -37,14 +37,13 @@ public class TransactionService {
             throw new UnauthorizedTransactionException("Transação não autorizada");
         }
 
-        this.notificationService.sendNotifation(payee.getEmail());
-
         Transaction transaction = Transaction.builder()
                 .payee(payee)
                 .payer(payer)
                 .amount(transactionDTO.amount())
                 .timeAtTransaction(LocalDateTime.now())
                 .build();
+
 
         payer.setBalance(payer.getBalance().subtract(transactionDTO.amount()));
         payee.setBalance(payee.getBalance().add(transactionDTO.amount()));
@@ -53,6 +52,8 @@ public class TransactionService {
 
         userService.updateBalance(payer);
         userService.updateBalance(payee);
+
+        this.notificationService.sendNotifation(payee.getEmail());
 
         return transactionConverter.toTransactionResponseDTO(transactionSaved);
     }
