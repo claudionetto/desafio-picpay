@@ -6,7 +6,9 @@ import com.claudionetto.desafiopicpay.domain.user.UserType;
 import com.claudionetto.desafiopicpay.dto.TransactionDTO;
 import com.claudionetto.desafiopicpay.dto.TransactionResponseDTO;
 import com.claudionetto.desafiopicpay.dto.UserResponseDTO;
+import com.claudionetto.desafiopicpay.exceptions.UnauthorizedTransactionException;
 import com.claudionetto.desafiopicpay.repositories.TransactionRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,4 +71,55 @@ class TransactionServiceTest {
         verify(transactionRepository).save(any());
     }
 
+    @Test
+    @DisplayName("Should throw a UnauthorizedTransactionException when transaction is unauthorized")
+    void createTransaction_ShouldThrowUnauthorizedTransactionException_WhenTransactionIsUnauthorized() {
+
+
+        User payer = new User(1L, "Claudio", "Netto", "claudio@gmail.com",
+                "123123123", "12345678", UserType.COMMON, BigDecimal.valueOf(50));
+        User payee = new User(2L, "José", "Netto", "jose@gmail.com",
+                "321321321", "12345678", UserType.MERCHANT, BigDecimal.valueOf(50));
+
+
+        when(userService.findById(1L)).thenReturn(payer);
+        when(userService.findById(2L)).thenReturn(payee);
+
+        when(authorizationService.authorizeTransaction()).thenReturn(false);
+
+        TransactionDTO transactionDTO = new TransactionDTO(new BigDecimal(20), 1L, 2L);
+
+        UnauthorizedTransactionException exception = assertThrows(UnauthorizedTransactionException.class, () -> {
+            transactionService.createTransaction(transactionDTO);
+        });
+
+        Assertions.assertEquals("Transação não autorizada", exception.getMessage());
+
+        verify(transactionRepository, times(0)).save(any());
+
+    }
+
+    @Test
+    @DisplayName("Shouldn't send notification when there is a exception")
+    void createTransaction_ShouldNotSendNotification_WhenThereIsException() {
+
+        User payer = new User(1L, "Claudio", "Netto", "claudio@gmail.com",
+                "123123123", "12345678", UserType.COMMON, BigDecimal.valueOf(50));
+        User payee = new User(2L, "José", "Netto", "jose@gmail.com",
+                "321321321", "12345678", UserType.MERCHANT, BigDecimal.valueOf(50));
+
+        when(userService.findById(1L)).thenReturn(payer);
+        when(userService.findById(2L)).thenReturn(payee);
+        when(authorizationService.authorizeTransaction()).thenReturn(true);
+
+        doThrow(new RuntimeException("Simulate exception in updateBalance")).when(userService).updateBalance(any());
+
+        TransactionDTO transactionDTO = new TransactionDTO(new BigDecimal(20), 1L, 2L);
+
+        assertThrows(RuntimeException.class, () -> {
+            transactionService.createTransaction(transactionDTO);
+        });
+
+        verifyNoInteractions(notificationService);
+    }
 }
