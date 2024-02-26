@@ -19,8 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,26 +48,33 @@ class TransactionServiceTest {
         User payee = new User(2L, "José", "Netto", "jose@gmail.com",
                 "321321321", "12345678", UserType.MERCHANT, BigDecimal.valueOf(50));
 
+        TransactionDTO transactionDTO = new TransactionDTO(new BigDecimal(20), 1L, 2L);
 
         when(userService.findById(1L)).thenReturn(payer);
         when(userService.findById(2L)).thenReturn(payee);
 
         when(authorizationService.authorizeTransaction()).thenReturn(true);
 
-        TransactionDTO transactionDTO = new TransactionDTO(new BigDecimal(20), 1L, 2L);
-
         UserResponseDTO userResponsePayer = new UserResponseDTO("Claudio", "Netto", "claudio@gmail.com",
                 "12345678", UserType.COMMON, BigDecimal.valueOf(50));
         UserResponseDTO userResponsePayee = new UserResponseDTO("José", "Netto", "jose@gmail.com",
                 "321321321", UserType.MERCHANT, BigDecimal.valueOf(50));
+        TransactionResponseDTO transactionResponseDTOMock = new TransactionResponseDTO(1L, userResponsePayee,
+                userResponsePayer, new BigDecimal(50), LocalDateTime.now());
 
         when(transactionConverter.toTransactionResponseDTO(any()))
-                .thenReturn(new TransactionResponseDTO(1L, userResponsePayee, userResponsePayer, new BigDecimal(50), LocalDateTime.now()));
+                .thenReturn(transactionResponseDTOMock);
 
         TransactionResponseDTO responseDTO = transactionService.createTransaction(transactionDTO);
 
         assertNotNull(responseDTO);
+        assertEquals(responseDTO ,transactionResponseDTOMock);
+        assertEquals(payer.getBalance(), BigDecimal.valueOf(30));
+        assertEquals(payee.getBalance(), BigDecimal.valueOf(70));
         verify(transactionRepository).save(any());
+        verify(userService).validateUser(payer, transactionDTO.amount());
+        verify(userService, times(2)).findById(any(Long.class));
+        verify(userService, times(2)).updateBalance(any(User.class));
     }
 
     @Test
@@ -93,7 +99,7 @@ class TransactionServiceTest {
                 () -> transactionService.createTransaction(transactionDTO)
         );
 
-        Assertions.assertEquals("Transação não autorizada", exception.getMessage());
+        assertEquals("Transação não autorizada", exception.getMessage());
 
         verify(transactionRepository, times(0)).save(any());
 
