@@ -4,17 +4,17 @@ import com.claudionetto.desafiopicpay.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(InsufficientBalanceException.class)
     public ResponseEntity<ExceptionResponse> handlerInsufficientBalanceException(
-            InsufficientBalanceException ex, HttpServletRequest request){
+            InsufficientBalanceException ex, HttpServletRequest request) {
 
         return new ResponseEntity<>(
                 ExceptionResponse.builder()
@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ExceptionResponse> handlerUserNotFoundException(
-            UserNotFoundException ex, HttpServletRequest request){
+            UserNotFoundException ex, HttpServletRequest request) {
 
         return new ResponseEntity<>(
                 ExceptionResponse.builder()
@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MerchantCannotMakeTransactionsException.class)
     public ResponseEntity<ExceptionResponse> handlerMerchantCannotMakeTransactionsException(
-            MerchantCannotMakeTransactionsException ex, HttpServletRequest request){
+            MerchantCannotMakeTransactionsException ex, HttpServletRequest request) {
 
         return new ResponseEntity<>(
                 ExceptionResponse.builder()
@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UnauthorizedTransactionException.class)
     public ResponseEntity<ExceptionResponse> handlerUnauthorizedTransactionException(
-            UnauthorizedTransactionException ex, HttpServletRequest request){
+            UnauthorizedTransactionException ex, HttpServletRequest request) {
 
         return new ResponseEntity<>(
                 ExceptionResponse.builder()
