@@ -53,7 +53,7 @@ public class TransactionService {
         userService.updateBalance(payer);
         userService.updateBalance(payee);
 
-        this.notificationService.sendNotifation(payee.getEmail());
+        this.notificationService.sendNotification(payee.getEmail());
 
         return transactionConverter.toTransactionResponseDTO(transactionSaved);
     }
