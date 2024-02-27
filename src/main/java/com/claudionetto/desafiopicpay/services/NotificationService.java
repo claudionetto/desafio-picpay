@@ -19,10 +19,11 @@ public class NotificationService {
         String url = "https://run.mocky.io/v3/54dc2cf1-3add-45b5-b5a9-6bf7e7f1f4a6";
 
         try {
-            Map<String, Object> notificationSent = restTemplate.getForObject(url, Map.class);
+            Map<String, Boolean> notificationSent = restTemplate.getForObject(url, Map.class);
 
             if (notificationSent != null && notificationSent.get("message") != null) {
-                boolean isNotificationSent = Boolean.parseBoolean(notificationSent.get("message").toString());
+
+                boolean isNotificationSent = notificationSent.get("message");
 
                 if (isNotificationSent) {
                     log.info("Email enviado para: " + email);
