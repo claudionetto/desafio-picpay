@@ -55,8 +55,8 @@ class TransactionServiceTest {
     @DisplayName("Should create transaction successfully when everything is OK")
     void createTransaction_ValidTransaction_ShouldReturnResponseDTO_WhenSuccessful() {
 
-        when(userService.findById(1L)).thenReturn(this.payer);
-        when(userService.findById(2L)).thenReturn(this.payee);
+        when(userService.findById(this.transactionDTO.payerId())).thenReturn(this.payer);
+        when(userService.findById(this.transactionDTO.payeeId())).thenReturn(this.payee);
         when(authorizationService.authorizeTransaction()).thenReturn(true);
 
         UserResponseDTO userResponsePayer = new UserResponseDTO("Claudio", "Netto",
@@ -64,7 +64,7 @@ class TransactionServiceTest {
         UserResponseDTO userResponsePayee = new UserResponseDTO("José", "Netto",
                 "jose@gmail.com", "321321321", UserType.MERCHANT, BigDecimal.valueOf(50));
         TransactionResponseDTO transactionResponseDTOMock = new TransactionResponseDTO(1L, userResponsePayee,
-                userResponsePayer, new BigDecimal(50), LocalDateTime.now());
+                userResponsePayer, new BigDecimal(20), LocalDateTime.now());
 
         when(transactionConverter.toTransactionResponseDTO(any()))
                 .thenReturn(transactionResponseDTOMock);
@@ -72,29 +72,13 @@ class TransactionServiceTest {
         TransactionResponseDTO responseDTO = transactionService.createTransaction(this.transactionDTO);
 
         assertNotNull(responseDTO);
-        assertEquals(responseDTO ,transactionResponseDTOMock);
+        assertEquals(responseDTO, transactionResponseDTOMock);
         assertEquals(payer.getBalance(), BigDecimal.valueOf(30));
         assertEquals(payee.getBalance(), BigDecimal.valueOf(70));
         verify(transactionRepository).save(any());
         verify(userService).validateUser(payer, transactionDTO.amount());
         verify(userService, times(2)).findById(any(Long.class));
         verify(userService, times(2)).updateBalance(any(User.class));
-    }
-
-    @Test
-    @DisplayName("Should throw a UnauthorizedTransactionException when transaction is unauthorized")
-    void createTransaction_ShouldThrowUnauthorizedTransactionException_WhenTransactionIsUnauthorized() {
-
-        when(userService.findById(1L)).thenReturn(this.payer);
-        when(userService.findById(2L)).thenReturn(this.payee);
-        when(authorizationService.authorizeTransaction()).thenReturn(false);
-
-        UnauthorizedTransactionException exception = assertThrows(UnauthorizedTransactionException.class,
-                () -> transactionService.createTransaction(this.transactionDTO)
-        );
-
-        assertEquals("Transação não autorizada", exception.getMessage());
-        verify(transactionRepository, times(0)).save(any());
     }
 
     @Test

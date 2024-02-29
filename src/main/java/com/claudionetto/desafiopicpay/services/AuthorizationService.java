@@ -1,5 +1,6 @@
 package com.claudionetto.desafiopicpay.services;
 
+import com.claudionetto.desafiopicpay.exceptions.UnauthorizedTransactionException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -21,9 +22,12 @@ public class AuthorizationService {
         if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
 
             Map<String, Object> responseBody = response.getBody();
-            return responseBody.get("message").equals("Autorizado");
 
+            if(responseBody != null && responseBody.get("message").equals("Autorizado")){
+                return true;
+            }
         }
-        return false;
+
+        throw new UnauthorizedTransactionException("Transação não autorizada");
     }
 }
