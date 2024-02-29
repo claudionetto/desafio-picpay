@@ -31,9 +31,9 @@ public class TransactionService {
 
         this.userService.validateUser(payer, transactionDTO.amount());
 
-        boolean isAuthorize = this.authorizationService.authorizeTransaction();
+        boolean isAuthorized = this.authorizationService.authorizeTransaction();
 
-        if (!isAuthorize) {
+        if (!isAuthorized) {
             throw new UnauthorizedTransactionException("Transação não autorizada");
         }
 

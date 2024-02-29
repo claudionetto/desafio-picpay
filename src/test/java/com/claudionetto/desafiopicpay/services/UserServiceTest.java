@@ -5,6 +5,8 @@ import com.claudionetto.desafiopicpay.domain.user.User;
 import com.claudionetto.desafiopicpay.domain.user.UserType;
 import com.claudionetto.desafiopicpay.dto.UserCreateDTO;
 import com.claudionetto.desafiopicpay.dto.UserResponseDTO;
+import com.claudionetto.desafiopicpay.exceptions.InsufficientBalanceException;
+import com.claudionetto.desafiopicpay.exceptions.MerchantCannotMakeTransactionsException;
 import com.claudionetto.desafiopicpay.exceptions.UserNotFoundException;
 import com.claudionetto.desafiopicpay.repositories.UserRepository;
 import org.assertj.core.api.Assertions;
@@ -49,7 +51,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("List all should return a list of UserResponseDTO when successful")
+    @DisplayName("list all should return a list of UserResponseDTO when successful")
     void listAll_ShouldReturnListOfUserResponseDTO_WhenSuccessful(){
 
         List<User> userList = List.of(this.user);
@@ -69,7 +71,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Save should save a new user and return a userResponseDTO when successful")
+    @DisplayName("save should save a new user and return a userResponseDTO when successful")
     void save_ShouldSaveUserAndReturnUserResponseDTO_WhenSuccessful(){
 
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(this.userCreated);
@@ -86,7 +88,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("Update balance should update the user when successful")
+    @DisplayName("updateBalance should update the user when successful")
     void updateBalance_ShouldUpdateAndReturnUser_WhenSuccessful(){
 
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user);
@@ -123,6 +125,52 @@ class UserServiceTest {
                 .hasMessage("Usuário não encontrado");
 
         Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong());
+    }
+
+    @Test
+    @DisplayName("validateUser should return true when user is valid, user is valid when UserType isn't Merchant"
+                + "and user has balance available to transaction")
+    void validateUser_ShouldReturnTrue_WhenUserIsValid(){
+
+        BigDecimal transactionValue = new BigDecimal(20);
+
+        boolean isValid = userService.validateUser(this.user, transactionValue);
+
+        Assertions.assertThat(isValid)
+                .isTrue();
+        Assertions.assertThat(this.user.getUserType())
+                .isNotEqualTo(UserType.MERCHANT);
+        Assertions.assertThat(this.user.getBalance())
+                .isGreaterThanOrEqualTo(transactionValue);
+    }
+
+    @Test
+    @DisplayName("validateUser should throw MerchantCannotMakeTransactionsException when user type is MERCHANT")
+    void validateUser_ShouldThrowMerchantCannotMakeTransactionsException_WhenIsMerchantUser() {
+
+        BigDecimal transactionValue = new BigDecimal(20);
+        User merchantUser = new User(1L, "Merchant", "Shop", "merchant@example.com",
+                "password", "12345678", UserType.MERCHANT, BigDecimal.valueOf(100));
+
+        Assertions.assertThatExceptionOfType(MerchantCannotMakeTransactionsException.class)
+                .isThrownBy(() -> userService.validateUser(merchantUser, transactionValue))
+                .withMessage("Lojistas não podem realizar transações, somente receber");
+    }
+
+    @Test
+    @DisplayName("validateUser should throw InsufficientBalanceException when user has insufficient balance")
+    void validateUser_ShouldThrowInsufficientBalanceException_WhenUserHasInsufficientBalance() {
+
+        BigDecimal transactionValue = new BigDecimal(100);
+
+        Assertions.assertThat(this.user.getBalance())
+                .isLessThan(transactionValue);
+        Assertions.assertThat(this.user.getUserType())
+                .isNotEqualTo(UserType.MERCHANT);
+
+        Assertions.assertThatExceptionOfType(InsufficientBalanceException.class)
+                .isThrownBy(() -> userService.validateUser(this.user, transactionValue))
+                .withMessage("Saldo insuficiente para o usuário realizar a transação");
     }
 
 }
