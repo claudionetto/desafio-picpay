@@ -1,5 +1,6 @@
 package com.claudionetto.desafiopicpay.services;
 
+import com.claudionetto.desafiopicpay.exceptions.UnauthorizedTransactionException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ class AuthorizationServiceTest {
 
     @Test
     @DisplayName("Should return true for authorized transaction when successful")
-    void authorizeTransaction_ShouldReturnTrue_ForAuthorizedTransaction(){
+    void authorizeTransaction_ShouldReturnTrue_WhenTransactionAuthorized(){
         String url = "https://run.mocky.io/v3/5794d450-d2e2-4412-8131-73d0293ac1cc";
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("message", "Autorizado");
@@ -40,8 +41,8 @@ class AuthorizationServiceTest {
     }
 
     @Test
-    @DisplayName("Should return false for unauthorized transaction")
-    void authorizeTransaction_ShouldReturnFalse_ForUnauthorizedTransaction(){
+    @DisplayName("Should throw UnauthorizedTransactionException for unauthorized transaction")
+    void authorizeTransaction_ShouldReturnUnauthorizedTransactionException_WhenTransactionUnauthorized(){
         String url = "https://run.mocky.io/v3/5794d450-d2e2-4412-8131-73d0293ac1cc";
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("message", "Negado");
@@ -49,22 +50,8 @@ class AuthorizationServiceTest {
 
         Mockito.when(restTemplate.getForEntity(url, Map.class)).thenReturn(responseEntity);
 
-        boolean result = authorizationService.authorizeTransaction();
-
-        Assertions.assertFalse(result);
+        Assertions.assertThrows(UnauthorizedTransactionException.class, () -> authorizationService.authorizeTransaction());
         Mockito.verify(restTemplate, Mockito.times(1)).getForEntity(url, Map.class);
     }
 
-    @Test
-    @DisplayName("Should return false for non-OK response from external service")
-    void authorizeTransaction_ShouldReturnFalse_ForNonOkResponseFromExternalService() {
-        String url = "https://run.mocky.io/v3/5794d450-d2e2-4412-8131-73d0293ac1cc";
-        ResponseEntity<Map> responseEntity = new ResponseEntity<>(new HashMap<>(), HttpStatus.INTERNAL_SERVER_ERROR);
-        Mockito.when(restTemplate.getForEntity(url, Map.class)).thenReturn(responseEntity);
-
-        boolean result = authorizationService.authorizeTransaction();
-
-        Assertions.assertFalse(result);
-        Mockito.verify(restTemplate, Mockito.times(1)).getForEntity(url, Map.class);
-    }
 }
